@@ -1,0 +1,10 @@
+alice|Alice123
+bob|Bob114514
+charlie|Charlie3
+david|David888
+emma|EmmaLove1
+frank|Frank666
+grace|Grace011
+henry|Henry911
+ivy|Ivy1919810
+jack|Jack2025
