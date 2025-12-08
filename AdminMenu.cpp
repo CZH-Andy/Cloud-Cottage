@@ -63,7 +63,7 @@ void AdminMenu::manageRooms() {
     std::cout << "  1. 添加新房型\n";
     std::cout << "  2. 修改房型信息\n";
     std::cout << "  3. 查看所有房型\n";
-    std::cout << "  4. 删除房型\n";
+    std::cout << "  4. 设置房型状态\n";
     std::cout << "  5. 返回上一级\n";
     std::cout << "\n";
     Utils::printLine();
@@ -98,7 +98,7 @@ void AdminMenu::manageRooms() {
       Utils::pause();
       break;
     case 4:
-      deleteRoomMenu();
+      setRoomStatusMenu();
       break;
     case 5:
       return;
@@ -149,7 +149,28 @@ void AdminMenu::addNewRoom() {
   std::cout << "请输入房型描述: ";
   std::getline(std::cin, desc);
 
+  // 显示输入的信息供确认
   int newId = system->getNextRoomId();
+  std::cout << "\n";
+  Utils::printLine();
+  std::cout << "请确认房型信息：" << std::endl;
+  std::cout << "  房型ID: " << newId << std::endl;
+  std::cout << "  房型名称: " << name << std::endl;
+  std::cout << "  价格: ¥" << std::fixed << std::setprecision(2) << price << "/晚" << std::endl;
+  std::cout << "  房间数量: " << quantity << " 间" << std::endl;
+  std::cout << "  描述: " << desc << std::endl;
+  Utils::printLine();
+
+  std::cout << "\n确认添加该房型吗？(y/n): ";
+  char confirm;
+  std::cin >> confirm;
+
+  if (confirm != 'y' && confirm != 'Y') {
+    std::cout << "\n已取消添加房型。" << std::endl;
+    Utils::pause();
+    return;
+  }
+
   Room newRoom(newId, name, price, quantity, desc);
   system->addRoom(newRoom);
 
@@ -245,20 +266,21 @@ void AdminMenu::viewAllRooms() {
               << room.getPrice() << "/晚" << std::endl;
     std::cout << "  可用数量: " << room.getTotalQuantity() << " 间" << std::endl;
     std::cout << "  描述: " << room.getDescription() << std::endl;
+    std::cout << "  状态: " << (room.getIsActive() ? "有效" : "失效") << std::endl;
     Utils::printLine();
   }
 }
 
-// 删除房型菜单
-void AdminMenu::deleteRoomMenu() {
+// 设置房型状态菜单
+void AdminMenu::setRoomStatusMenu() {
   Utils::clearScreen();
-  Utils::printHeader("删除房型");
+  Utils::printHeader("设置房型状态");
   std::cout << "\n";
   std::cout << "当前房型列表：" << std::endl;
   viewAllRooms();
 
   int roomId;
-  std::cout << "\n请输入要删除的房型ID (输入0返回): ";
+  std::cout << "\n请输入要设置状态的房型ID (输入0返回): ";
   std::cin >> roomId;
 
   if (std::cin.fail()) {
@@ -281,15 +303,51 @@ void AdminMenu::deleteRoomMenu() {
     return;
   }
 
-  std::cout << "\n确认要删除房型 \"" << room->getRoomName() << "\" 吗？(y/n): ";
-  char confirm;
-  std::cin >> confirm;
+  std::cout << "\n当前房型信息：" << std::endl;
+  room->display();
+  std::cout << "\n";
+  Utils::printLine();
 
-  if (confirm == 'y' || confirm == 'Y') {
-    system->deleteRoom(roomId);
-    std::cout << "\n房型删除成功！" << std::endl;
+  std::cout << "\n请选择操作：" << std::endl;
+  std::cout << "  1. 设置为有效" << std::endl;
+  std::cout << "  2. 设置为失效" << std::endl;
+  std::cout << "  0. 取消" << std::endl;
+  std::cout << "\n请选择: ";
+
+  int choice;
+  std::cin >> choice;
+
+  if (std::cin.fail()) {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "\n输入无效！" << std::endl;
+    Utils::pause();
+    return;
+  }
+
+  std::cin.ignore();
+
+  if (choice == 0) {
+    std::cout << "\n已取消操作。" << std::endl;
+    Utils::pause();
+    return;
+  }
+
+  bool newStatus;
+  if (choice == 1) {
+    newStatus = true;
+  } else if (choice == 2) {
+    newStatus = false;
   } else {
-    std::cout << "\n已取消删除。" << std::endl;
+    std::cout << "\n无效选择！" << std::endl;
+    Utils::pause();
+    return;
+  }
+
+  if (system->setRoomStatus(roomId, newStatus)) {
+    std::cout << "\n房型状态设置成功！" << std::endl;
+  } else {
+    std::cout << "\n房型状态设置失败！" << std::endl;
   }
 
   Utils::pause();

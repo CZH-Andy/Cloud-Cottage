@@ -58,8 +58,9 @@ public:
   void updateRoom(int roomId, const Room &room);
   Room *getRoomById(int roomId);
   std::vector<Room> &getAllRooms();
+  std::vector<Room> getActiveRooms();
   int getNextRoomId();
-  bool deleteRoom(int roomId);
+  bool setRoomStatus(int roomId, bool active);
 
   // 订单管理
   void addOrder(const Order &order);

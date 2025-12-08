@@ -15,7 +15,7 @@ private:
   void addNewRoom();
   void modifyRoom();
   void viewAllRooms();
-  void deleteRoomMenu();
+  void setRoomStatusMenu();
 
 public:
   AdminMenu(System *sys);

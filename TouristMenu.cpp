@@ -75,7 +75,7 @@ void TouristMenu::viewRooms() {
   Utils::printHeader("查看房型");
   std::cout << "\n";
 
-  std::vector<Room> &rooms = system->getAllRooms();
+  std::vector<Room> rooms = system->getActiveRooms();
 
   if (rooms.empty()) {
     std::cout << "暂无可用房型。" << std::endl;
@@ -119,7 +119,7 @@ void TouristMenu::bookRoom() {
   Utils::printHeader("预订房间");
   std::cout << "\n";
 
-  std::vector<Room> &rooms = system->getAllRooms();
+  std::vector<Room> rooms = system->getActiveRooms();
 
   if (rooms.empty()) {
     std::cout << "暂无可用房型。" << std::endl;
@@ -155,6 +155,12 @@ void TouristMenu::bookRoom() {
   Room *room = system->getRoomById(roomId);
   if (!room) {
     std::cout << "\n房型不存在！" << std::endl;
+    Utils::pause();
+    return;
+  }
+
+  if (!room->getIsActive()) {
+    std::cout << "\n该房型已失效，无法预订！" << std::endl;
     Utils::pause();
     return;
   }

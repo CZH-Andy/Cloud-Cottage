@@ -92,14 +92,15 @@ void System::loadRooms() {
       continue;
 
     std::vector<std::string> tokens = split(line, '|');
-    if (tokens.size() >= 5) {
+    if (tokens.size() >= 6) {
       int id = std::stoi(tokens[0]);
       std::string name = tokens[1];
       double price = std::stod(tokens[2]);
       int quantity = std::stoi(tokens[3]);
       std::string desc = tokens[4];
+      bool active = (tokens[5] == "1" || tokens[5] == "true");
 
-      Room room(id, name, price, quantity, desc);
+      Room room(id, name, price, quantity, desc, active);
       rooms.push_back(room);
     }
   }
@@ -119,7 +120,7 @@ void System::saveRooms() {
   for (const auto &room : rooms) {
     file << room.getRoomId() << "|" << room.getRoomName() << "|"
          << room.getPrice() << "|" << room.getTotalQuantity() << "|"
-         << room.getDescription() << std::endl;
+         << room.getDescription() << "|" << (room.getIsActive() ? "1" : "0") << std::endl;
   }
 
   file.close();
@@ -339,6 +340,17 @@ Room *System::getRoomById(int roomId) {
 // 获取所有房型
 std::vector<Room> &System::getAllRooms() { return rooms; }
 
+// 获取所有有效房型
+std::vector<Room> System::getActiveRooms() {
+  std::vector<Room> activeRooms;
+  for (const auto &room : rooms) {
+    if (room.getIsActive()) {
+      activeRooms.push_back(room);
+    }
+  }
+  return activeRooms;
+}
+
 // 获取下一个房型ID
 int System::getNextRoomId() {
   int maxId = 0;
@@ -350,11 +362,11 @@ int System::getNextRoomId() {
   return maxId + 1;
 }
 
-// 删除房型
-bool System::deleteRoom(int roomId) {
-  for (auto it = rooms.begin(); it != rooms.end(); ++it) {
-    if (it->getRoomId() == roomId) {
-      rooms.erase(it);
+// 设置房型状态
+bool System::setRoomStatus(int roomId, bool active) {
+  for (auto &room : rooms) {
+    if (room.getRoomId() == roomId) {
+      room.setIsActive(active);
       saveRooms();
       return true;
     }
@@ -471,7 +483,7 @@ std::vector<Comment> &System::getAllComments() { return comments; }
 int System::getAvailableRoomCount(int roomId, const std::string &checkIn,
                                   const std::string &checkOut) {
   Room *room = getRoomById(roomId);
-  if (!room)
+  if (!room || !room->getIsActive())
     return 0;
 
   int totalCount = room->getTotalQuantity();
